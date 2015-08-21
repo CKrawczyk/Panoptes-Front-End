@@ -13,7 +13,20 @@ module?.exports = React.createClass
     loading: true
 
   componentWillMount: ->
-    @setProjects()
+    # set projects from user prefs
+    # otherwise grab some hard-coded
+    # default projects
+
+    @props.user.get('project_preferences').then (preferences) =>
+      projectsPromise = preferences
+        .map (pref) =>
+          apiClient.type('projects').get(pref.links.project)
+
+      Promise.all(projectsPromise).then (projects) =>
+        if projects?.length
+          @setState {projects, loading: false}
+        else
+          @setProjects()
 
   shouldComponentUpdate: (nextProps, nextState) ->
     nextState.projects isnt @state.projects

@@ -139,7 +139,7 @@ module?.exports = React.createClass
         <div className="talk-sidebar">
           <h2>Talk Sidebar</h2>
 
-          <ProjectLinker />
+          <ProjectLinker user={@props.user} />
 
           <section>
             <PopularTags
