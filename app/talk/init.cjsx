@@ -16,6 +16,7 @@ require '../api/sugar'
 ZooniverseTeam = require './lib/zoo-team.cjsx'
 alert = require '../lib/alert'
 AddZooTeamForm = require './add-zoo-team-form'
+{Pager} = require('pagerz')
 
 module?.exports = React.createClass
   displayName: 'TalkInit'
@@ -31,6 +32,7 @@ module?.exports = React.createClass
   getInitialState: ->
     boards: []
     loading: true
+    boardsMeta: {}
 
   componentWillMount: ->
     sugarClient.subscribeTo('zooniverse') if @props.section is 'zooniverse'
@@ -39,9 +41,10 @@ module?.exports = React.createClass
     sugarClient.unsubscribeFrom('zooniverse') if @props.section is 'zooniverse'
 
   setBoards: (propValue, props = @props) ->
-    talkClient.type('boards').get(section: props.section)
+    talkClient.type('boards').get(section: props.section, page_size: 1)
       .then (boards) =>
-        @setState {boards, loading: false}
+        boardsMeta = boards[0]?.getMeta()
+        @setState {boards, boardsMeta, loading: false}
 
   boardPreview: (data, i) ->
     <BoardPreview {...@props} key={i} data={data} />
@@ -85,9 +88,17 @@ module?.exports = React.createClass
           {if @state.loading
             <Loading />
            else if @state.boards?.length is 0
-            <p>There are currently no boards.</p>
-           else if @state.boards?.length
-             @state.boards.map(@boardPreview)}
+            <p>There are currently no boards.</p>}
+
+          <Pager
+            resourceProp={'data'}
+            data={@state.boards}
+            page={@state.boardsMeta?.page}
+            nextPage={@state.boardsMeta?.next_page}
+            previousPage={@state.boardsMeta?.previous_page}>
+            <BoardPreview {...@props} />
+          </Pager>
+
         </section>
 
         <div className="talk-sidebar">
