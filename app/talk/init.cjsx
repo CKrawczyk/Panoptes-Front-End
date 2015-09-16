@@ -2,7 +2,6 @@ React = require 'react'
 BoardPreview = require './board-preview'
 ActiveUsers = require './active-users'
 talkClient = require '../api/talk'
-PromiseRenderer = require '../components/promise-renderer'
 HandlePropChanges = require '../lib/handle-prop-changes'
 Moderation = require './lib/moderation'
 ProjectLinker = require './lib/project-linker'
@@ -16,7 +15,7 @@ require '../api/sugar'
 ZooniverseTeam = require './lib/zoo-team.cjsx'
 alert = require '../lib/alert'
 AddZooTeamForm = require './add-zoo-team-form'
-{Pager} = require('pagerz')
+{Pager, PageNumberPager} = require('pagerz')
 
 module?.exports = React.createClass
   displayName: 'TalkInit'
@@ -48,6 +47,15 @@ module?.exports = React.createClass
 
   boardPreview: (data, i) ->
     <BoardPreview {...@props} key={i} data={data} />
+
+  onPageChange: (page) ->
+    talkClient.type('boards').get({
+      section: @props.section,
+      page_size: 1,
+      page: page
+    }).then (boards) =>
+      boardsMeta = boards[0]?.getMeta()
+      @setState {boards, boardsMeta}
 
   render: ->
     <div className="talk-home">
@@ -90,14 +98,19 @@ module?.exports = React.createClass
            else if @state.boards?.length is 0
             <p>There are currently no boards.</p>}
 
-          <Pager
-            resourceProp={'data'}
-            data={@state.boards}
-            page={@state.boardsMeta?.page}
-            nextPage={@state.boardsMeta?.next_page}
-            previousPage={@state.boardsMeta?.previous_page}>
-            <BoardPreview {...@props} />
-          </Pager>
+
+          {if @state.boards.length > 0
+            <Pager
+              resourceProp={'data'}
+              data={@state.boards}
+              currentPage={@state.boardsMeta?.page}
+              onPageChange={@onPageChange}
+              pageCount={@state.boardsMeta?.page_count}
+              nextPage={@state.boardsMeta?.next_page}
+              previousPage={@state.boardsMeta?.previous_page}>
+              <BoardPreview {...@props} />
+            </Pager>
+          }
 
         </section>
 
