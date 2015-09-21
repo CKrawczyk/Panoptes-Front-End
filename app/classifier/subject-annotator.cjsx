@@ -145,6 +145,19 @@ module.exports = React.createClass
 
       {if AfterSubject?
         <AfterSubject {...hookProps} />}
+
+      {if @props.workflow.overall_tasks?
+        <div className="overall-tasks">
+          {for taskDescription, i in @props.workflow.overall_tasks
+            taskDescription._key ?= Math.random()
+            TaskComponent = tasks[taskDescription.type]
+            <TaskComponent
+              key={taskDescription._key}
+              task={taskDescription}
+              annotation={@props.classification.overall_annotations[i]}
+              onChange={@props.classification.update.bind @props.classification, 'annotations'}
+            />}
+        </div>}
     </div>
 
   handleSubjectFrameLoad: (e) ->

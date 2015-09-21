@@ -46,6 +46,11 @@ Classifier = React.createClass
           @props.onLoad?()
 
   prepareToClassify: (classification) ->
+    if @props.workflow.overall_tasks?
+      classification.overall_annotations ?= @props.workflow.overall_tasks.map (taskDescription) =>
+        TaskComponent = tasks[taskDescription.type]
+        TaskComponent.getDefaultAnnotation()
+
     classification.annotations ?= []
     if classification.annotations.length is 0
       @addAnnotationForTask classification, @props.workflow.first_task

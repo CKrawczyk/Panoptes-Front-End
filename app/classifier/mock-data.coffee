@@ -8,6 +8,23 @@ BLANK_IMAGE = ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgAQMAAAA',
 workflow = apiClient.type('workflows').create
   id: 'MOCK_WORKFLOW_FOR_CLASSIFIER'
 
+  overall_tasks: [{
+    type: 'single'
+    question: 'And how does this make you _feel_?'
+    answers: [
+      {label: ':) Radical'}
+      {label: ':| Ehhh'}
+      {label: ':( Poop'}
+    ]
+  }, {
+    type: 'multiple'
+    question: ''
+    answers: [
+      {label: 'Fire'}
+      {label: 'Nothing here'}
+    ]
+  }]
+
   first_task: 'crop'
   tasks:
     crop:
@@ -244,6 +261,11 @@ subject = apiClient.type('subjects').create
     }]
 
 classification = apiClient.type('classifications').create
+  overall_annotations: [{
+    value: null
+  }, {
+    value: []
+  }]
   annotations: []
   metadata: {}
   links:
