@@ -8,7 +8,7 @@ MINIMUM_SIZE = 5
 GUIDE_WIDTH = 1
 GUIDE_DASH = [4, 4]
 
-DELETE_BUTTON_WEIGHT = 5 # Weight of the second point.
+DELETE_BUTTON_WEIGHT = 2 # Weight of the second point.
 
 module.exports = React.createClass
   displayName: 'GalaxyArmTool'
@@ -94,8 +94,8 @@ module.exports = React.createClass
     {points} = @props.mark
 
     deleteButtonPosition =
-      x: (firstPoint.x + ((DELETE_BUTTON_WEIGHT - 1) * secondPoint.x)) / DELETE_BUTTON_WEIGHT
-      y: (firstPoint.y + ((DELETE_BUTTON_WEIGHT - 1) * secondPoint.y)) / DELETE_BUTTON_WEIGHT
+      x: (points[0].x + ((DELETE_BUTTON_WEIGHT - 1) * points[1].x)) / DELETE_BUTTON_WEIGHT
+      y: (points[0].y + ((DELETE_BUTTON_WEIGHT - 1) * points[1].y)) / DELETE_BUTTON_WEIGHT
 
     guideWidth = GUIDE_WIDTH / ((@props.scale.horizontal + @props.scale.vertical) / 2)
 
