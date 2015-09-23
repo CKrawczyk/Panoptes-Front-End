@@ -14,11 +14,13 @@ module.exports = React.createClass
   displayName: 'GalaxyArmTool'
 
   statics:
+    initCoords: null
+
     defaultValues: ({x, y}) ->
       points: []
 
     initStart: ({x, y}, mark) ->
-      mark.points.push {x, y}
+      mark.points = [{x, y}, {x, y}, {x, y}, {x, y}, {x, y}]
       points: mark.points
 
     initMove: (cursor, mark) ->
@@ -81,52 +83,46 @@ module.exports = React.createClass
       # {pos of arm tip},
       # {curve control point 2},
       # {pos of last point}]
-      mark.points.push {x:c1x, y:c1y}
-      mark.points.push {x:tx, y:ty}
-      mark.points.push {x:c2x, y:c2y}
-      mark.points.push {x:xl, y:yl}
+      mark.points = [{x, y}, {x:c1x, y:c1y}, {x:tx, y:ty}, {x:c2x, y:c2y}, {x:xl, y:yl}]
       points: mark.points
 
     initValid: (mark) ->
-      Math.abs(mark.points[0].x - mark.poitns[2].x) > MINIMUM_SIZE and Math.abs(mark.points[0].y - mark.poitns[2].y)
+      Math.abs(mark.points[0].x - mark.points[2].x) > MINIMUM_SIZE and Math.abs(mark.points[0].y - mark.points[2].y)
 
   render: ->
     {points} = @props.mark
-
-    deleteButtonPosition =
-      x: (points[0].x + ((DELETE_BUTTON_WEIGHT - 1) * points[1].x)) / DELETE_BUTTON_WEIGHT
-      y: (points[0].y + ((DELETE_BUTTON_WEIGHT - 1) * points[1].y)) / DELETE_BUTTON_WEIGHT
-
     guideWidth = GUIDE_WIDTH / ((@props.scale.horizontal + @props.scale.vertical) / 2)
 
+    deleteButtonPosition =
+      x: (points[0].x + ((DELETE_BUTTON_WEIGHT - 1) * points[4].x)) / DELETE_BUTTON_WEIGHT
+      y: (points[0].y + ((DELETE_BUTTON_WEIGHT - 1) * points[4].y)) / DELETE_BUTTON_WEIGHT
 
     # start at inital point
-    svgPath = 'M#{points[0].x} #{points[0].y} '
+    svgPath = "M#{points[0].x} #{points[0].y} "
     # draw a quadratic Bezier curve to the tip using control point 1
-    svgPath += 'Q #{points[1].x} #{points[1].y} #{points[2].x} #{points[2].y} '
+    svgPath += "Q #{points[1].x} #{points[1].y} #{points[2].x} #{points[2].y} "
     # draw a quadratic Bezier curve from the tip using control point 2
-    svgPath += 'Q #{points[3].x} #{points[3].y} #{points[4].x} #{points[4].y} '
+    svgPath += "Q #{points[3].x} #{points[3].y} #{points[4].x} #{points[4].y} "
     # close the curve
-    svgPath += 'L #{points[0].x} #{points[0].y}'
+    svgPath += "L #{points[0].x} #{points[0].y}"
 
-  <DrawingToolRoot tool={this}>
-    <Draggable onDrag={@handleMainDrag} disable={@props.disabled}>
-      <path d={svgPath} fill={'none'} />
-    </Draggable>
+    <DrawingToolRoot tool={this}>
+      <Draggable onDrag={@handleMainDrag} disabled={@props.disabled}>
+        <path d={svgPath} />
+      </Draggable>
 
-    {if @props.selected
-      <g>
-        <DeleteButton tool={this} x={deleteButtonPosition.x} y={deleteButtonPosition.y} />
+      {if @props.selected
+        <g>
+          <DeleteButton tool={this} x={deleteButtonPosition.x} y={deleteButtonPosition.y} />
+          <line x1={points[0].x} y1={points[0].y} x2={points[1].x} y2={points[1].y} strokeWidth={guideWidth} strokeDasharray={GUIDE_DASH} />
+          <line x1={points[1].x} y1={points[1].y} x2={points[2].x} y2={points[2].y} strokeWidth={guideWidth} strokeDasharray={GUIDE_DASH} />
+          <line x1={points[2].x} y1={points[2].y} x2={points[3].x} y2={points[3].y} strokeWidth={guideWidth} strokeDasharray={GUIDE_DASH} />
+          <line x1={points[3].x} y1={points[3].y} x2={points[4].x} y2={points[4].y} strokeWidth={guideWidth} strokeDasharray={GUIDE_DASH} />
 
-        <line x1={points[0].x} y1={points[0].y} x2={points[1].x} y2={points[1].y} strokeWidth={guideWidth} strokeDasharray={GUIDE_DASH} />
-        <line x1={points[1].x} y1={points[1].y} x2={points[2].x} y2={points[2].y} strokeWidth={guideWidth} strokeDasharray={GUIDE_DASH} />
-        <line x1={points[2].x} y1={points[2].y} x2={points[3].x} y2={points[3].y} strokeWidth={guideWidth} strokeDasharray={GUIDE_DASH} />
-        <line x1={points[3].x} y1={points[3].y} x2={points[4].x} y2={points[4].y} strokeWidth={guideWidth} strokeDasharray={GUIDE_DASH} />
-
-        {for point, i in @props.mark.points
-          <DragHandle key={i} x={point.x} y={point.y} scale={@props.scale} onDrag={@handleHandleDrag.bind this, i} />}
-      </g>}
-  </DrawingToolRoot>
+          {for point, i in @props.mark.points
+            <DragHandle key={i} x={point.x} y={point.y} scale={@props.scale} onDrag={@handleHandleDrag.bind this, i} />}
+        </g>}
+    </DrawingToolRoot>
 
   handleMainDrag: (e, d) ->
     for point in @props.mark.points
