@@ -6,3 +6,4 @@ module.exports =
   circle: require './circle'
   ellipse: require './ellipse'
   galaxyArm: require './galaxy-arm'
+  curve: require './curve'
