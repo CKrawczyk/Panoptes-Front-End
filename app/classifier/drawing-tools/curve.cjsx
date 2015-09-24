@@ -89,7 +89,7 @@ module.exports = React.createClass
       {if @props.selected
         <g>
           <DeleteButton tool={this} x={deleteButtonPosition.x} y={deleteButtonPosition.y} />
-          <path d={svgPathHelpers} strokeWidth={guideWidth} strokeDasharray={GUIDE_DASH} />
+          <path d={svgPathHelpers} strokeWidth={guideWidth} strokeDasharray={GUIDE_DASH} fill={'none'} />
 
           {if not @props.mark.closed and @props.mark.points.length and @state.mouseWithinViewer
             <line className="guideline" x1={lastPoint.x} y1={lastPoint.y} x2={@state.mouseX} y2={@state.mouseY} />}
@@ -103,7 +103,6 @@ module.exports = React.createClass
           {unless @props.mark.closed
             <g>
               <circle className="clickable" r={finisherRadius} cx={firstPoint.x} cy={firstPoint.y} stroke="transparent" onClick={@handleFinishClick} />
-              <circle className="clickable" r={finisherRadius} cx={lastPoint.x} cy={lastPoint.y} onClick={@handleFinishClick} />
             </g>}
         </g>}
     </DrawingToolRoot>
