@@ -282,6 +282,18 @@ COPY_GREY_LIGHT = #afaeae
   .talk-discussion-link
     color: COPY_GREY_LIGHT
 
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+    .latest-comment-preview-link
+      text-decoration: none
+      color: COPY_GREY_LIGHT
+      font-style: normal
+
+      &:hover
+        text-decoration: underline
+
     .avatar
       height: 2em
       vertical-align: -0.5em
@@ -294,7 +306,7 @@ COPY_GREY_LIGHT = #afaeae
       &:hover
         color: COBOLT_BLUE
 
-    a:last-child
+    .latest-comment-time
       color: COPY
       font-style: italic
       text-decoration: underline
@@ -389,8 +401,13 @@ COPY_GREY_LIGHT = #afaeae
     .markdown
       > blockquote
         opacity: 0.5
+
+      > pre
+        white-space: pre-line
+
       img
         max-width: 100%
+
     .subject-container
       max-width: 100%
       img
@@ -449,6 +466,7 @@ COPY_GREY_LIGHT = #afaeae
     width: 80%
     float: left
     position: relative
+    overflow: auto
 
     .talk-comment-date
       margin: 0
