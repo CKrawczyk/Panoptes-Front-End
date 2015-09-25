@@ -8,8 +8,10 @@ FINISHER_RADIUS = 8
 GRAB_STROKE_WIDTH = 6
 GUIDE_WIDTH = 1
 GUIDE_DASH = [4, 4]
+# fraction of line lenght along (x) and perpendicular (y) to the line to place control point
+DEFAULT_CURVE = {x: 0.5, y: 0}
 
-DELETE_BUTTON_WEIGHT = 3 # Weight of the second point.
+DELETE_BUTTON_WEIGHT = 2 # Weight of the second point.
 
 module.exports = React.createClass
   displayName: 'CurveTool'
@@ -21,13 +23,20 @@ module.exports = React.createClass
       points: []
       closed: false
 
-    initStart: ({x, y}, mark) ->
+    initStart: (newPoint, mark) ->
       if mark.points.length > 0
-        lastPoint = mark.points[mark.points.length - 1]
-        cx = 0.5 * (x + lastPoint.x)
-        cy = 0.5 * (y + lastPoint.y)
-        mark.points.push {x: cx, y: cy}
-      mark.points.push {x, y}
+        lastEnd = mark.points[-1..][0]
+        cp = @toImageFrame(lastEnd, newPoint, DEFAULT_CURVE)
+        mark.points.push cp
+      ###
+      else if mark.points.length > 0
+        # make the new control point in the same relitive position as the previous one
+        [lastStart, lastControl, lastEnd] = mark.points[-3..]
+        cpPrime = @toLineFrame(lastStart, lastEnd, lastControl)
+        cp = @toImageFrame(lastEnd, newPoint, cpPrime)
+        mark.points.push cp
+      ###
+      mark.points.push newPoint
       points: mark.points
 
     initMove: ({x, y}, mark) ->
@@ -40,6 +49,25 @@ module.exports = React.createClass
     forceComplete: (mark) ->
       mark.closed = true
       mark.auto_closed = true
+
+    toLineFrame: (start, end, control) ->
+      # Move the contorl point to a local frame
+      # where the line is on the x-axis and has length 1
+      dx = end.x - start.x
+      dy = end.y - start.y
+      dcx = control.x - start.x
+      dcy = control.y - start.y
+      con = 1 / ((dx * dx) + (dy * dy))
+      x: ((dx * dcx) + (dy * dcy)) * con
+      y: (-(dy * dcx) + (dx * dcy)) * con
+
+    toImageFrame: (start, end, control) ->
+      # Take a control point in the line frame
+      # and move it to the image frame
+      dx = end.x - start.x
+      dy = end.y - start.y
+      x: (dx * control.x) - (dy * control.y) + start.x
+      y: (dy * control.x) + (dx * control.y) + start.y
 
   componentWillMount: ->
     @setState
@@ -80,6 +108,18 @@ module.exports = React.createClass
         else
           svgPath += "Q #{lastPoint.x} #{lastPoint.y} #{firstPoint.x} #{firstPoint.y}"
           svgPathHelpers += "L #{lastPoint.x} #{lastPoint.y} L #{firstPoint.x} #{firstPoint.y}"
+    if not @props.mark.closed and @state.mouseWithinViewer and points.length
+      #if points.length == 1
+      lastEnd = lastPoint
+      cpPrime = DEFAULT_CURVE
+      ###
+      else
+        [lastStart, lastControl, lastEnd] = points[-3..]
+        cpPrime = @constructor.toLineFrame(lastStart, lastEnd, lastControl)
+      ###
+      newPoint ={x: @state.mouseX, y: @state.mouseY}
+      cp = @constructor.toImageFrame(lastEnd, newPoint, cpPrime)
+      svgPathGuide = "M#{lastEnd.x} #{lastEnd.y} Q #{cp.x} #{cp.y} #{newPoint.x} #{newPoint.y}"
 
     <DrawingToolRoot tool={this}>
       <Draggable onDrag={@handleMainDrag} disabled={@props.disabled}>
@@ -91,8 +131,8 @@ module.exports = React.createClass
           <DeleteButton tool={this} x={deleteButtonPosition.x} y={deleteButtonPosition.y} />
           <path d={svgPathHelpers} strokeWidth={guideWidth} strokeDasharray={GUIDE_DASH} fill={'none'} />
 
-          {if not @props.mark.closed and @props.mark.points.length and @state.mouseWithinViewer
-            <line className="guideline" x1={lastPoint.x} y1={lastPoint.y} x2={@state.mouseX} y2={@state.mouseY} />}
+          {if not @props.mark.closed and points.length and @state.mouseWithinViewer
+            <path className="guideline" d={svgPathGuide} fill={'none'} />}
 
           {if not @props.mark.closed and @props.mark.points.length > 2
             <line className="guideline" x1={lastPoint.x} y1={lastPoint.y} x2={firstPoint.x} y2={firstPoint.y} />}
@@ -125,10 +165,11 @@ module.exports = React.createClass
 
   handleFinishClick: ->
     firstPoint = @props.mark.points[0]
-    lastPoint = @props.mark.points[@props.mark.points.length - 1]
-    cx = 0.5 * (firstPoint.x + lastPoint.x)
-    cy = 0.5 * (firstPoint.y + lastPoint.y)
-    @props.mark.points.push {x: cx, y: cy}
+    [lastStart, lastControl, lastEnd] = @props.mark.points[-3..]
+    #cpPrime = @constructor.toLineFrame(lastStart, lastEnd, lastControl)
+    cpPrime = DEFAULT_CURVE
+    cp = @constructor.toImageFrame(lastEnd, firstPoint, cpPrime)
+    @props.mark.points.push cp
     document.removeEventListener 'mousemove', @handleMouseMove
 
     @props.mark.closed = true
