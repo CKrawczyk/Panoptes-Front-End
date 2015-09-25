@@ -31,3 +31,7 @@ module.exports =
     <path d="M90 90 Q 10 50 90 10" fill={'none'} />
     <path d="M90 90 L 10 50 L 90 10" strokeDasharray={[10, 10]} fill={'none'} />
   </svg>
+
+  galaxyArm: <svg viewBox="0 0 100 100">
+    <path d="M10 90 Q 62 90 90 10 Q 60 60 10 60 L 10 90" fill={'none'} />
+  </svg>
