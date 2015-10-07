@@ -15,7 +15,7 @@ isAdmin = require '../../lib/is-admin'
 
 NOOP = Function.prototype
 
-VALID_SUBJECT_EXTENSIONS = ['.jpg', '.png', '.gif', '.svg']
+VALID_SUBJECT_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.svg']
 INVALID_FILENAME_CHARS = ['/', '\\', ':']
 MAX_FILE_SIZE = 600000
 
@@ -248,7 +248,7 @@ EditSubjectSetPage = React.createClass
     reader.onload = (e) =>
       # TODO: Look into PapaParse features.
       # Maybe wan we parse the file object directly in a worker.
-      {data, errors} = Papa.parse e.target.result.trim(), header: true
+      {data, errors} = Papa?.parse e.target.result.trim(), header: true
       @subjectsFromManifest(data, errors, file.name)
     reader.readAsText file
 
