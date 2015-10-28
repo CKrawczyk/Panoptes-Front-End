@@ -44,6 +44,7 @@ module.exports =
     <Route name="project-research" path="research/?" handler={require './pages/project/research'} />
     <Route name="project-results" path="results/?" handler={require './pages/project/results'} />
     <Route name="project-classify" path="classify/?" handler={require './pages/project/classify'} />
+    <Route name="project-notifications" path="notifications/?" handler={require './pages/notifications'} />
     <Route name="project-talk" path="talk/?" handler={require './pages/project/talk'}>
       <DefaultRoute name="project-talk-home" handler={require './talk/init'} />
       <Route name="project-talk-recents" path="recents/?" handler={require './talk/recents'} />
@@ -59,6 +60,9 @@ module.exports =
     <Route name="project-faq" path="faq/?" handler={require './pages/project/faq'} />
     <Route name="project-education" path="education/?" handler={require './pages/project/education'} />
   </Route>
+
+  <Route name="notifications" path="notifications/?" handler={require './pages/notifications'} />
+  <Route name="section-notifications" path=":section/notifications/?" handler={require './pages/notifications'} />
 
   <Route name="talk" path="talk/?" handler={require './talk'}>
     <DefaultRoute name="talk-home" handler={require './talk/init'} />
@@ -99,6 +103,7 @@ module.exports =
     <Route name="edit-project-visibility" path="visibility/?" handler={require './pages/lab/visibility'} />
     <Route name="edit-project-talk" path="talk/?" handler={require './pages/lab/talk'} />
     <Route name="get-data-exports" path="data-exports" handler={require './pages/lab/data-dumps'} />
+    <Route name="edit-project-tutorial" path="tutorial" handler={require './pages/lab/tutorial'} />
   </Route>
   <Route name="lab-policies" path="lab-policies/?" handler={require './pages/lab/lab-policies'} />
   <Route name="lab-how-to" path="lab-how-to/?" handler={require './pages/lab/how-to-page'} />
@@ -117,4 +122,3 @@ module.exports =
   <Route path="dev/aggregate" handler={require './components/aggregate-view'} />
   <Route path="dev/ribbon" handler={require './components/classifications-ribbon'} />
 </Route>
-
