@@ -42,6 +42,9 @@ module.exports = React.createClass
             <div>
               <button type="button" disabled={avatar is null} onClick={@handleMediaClear.bind(this, 'avatar')}>Clear avatar</button>
             </div>
+            <div>
+              <button type="button" disabled={avatar is null} onClick={@handleMediaClear.bind(this, 'avatar')}>Clear avatar</button>
+            </div>
           </div>
         }</PromiseRenderer>
         {if @state.avatarError
@@ -56,6 +59,9 @@ module.exports = React.createClass
             <p className="form-help">Drop an image here (any dimensions, less than {Math.floor MAX_HEADER_SIZE / 1000} KB)</p>
             <div style={width: '40vw'}>
               <ImageSelector maxSize={MAX_HEADER_SIZE} src={header?.src} placeholder={placeholder} onChange={@handleMediaChange.bind(this, 'profile_header')} />
+            </div>
+            <div>
+              <button type="button" disabled={header is null} onClick={@handleMediaClear.bind(this, 'profile_header')}>Clear header</button>
             </div>
             <div>
               <button type="button" disabled={header is null} onClick={@handleMediaClear.bind(this, 'profile_header')}>Clear header</button>
