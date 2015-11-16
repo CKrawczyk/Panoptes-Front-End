@@ -138,11 +138,16 @@ module.exports = React.createClass
             <line className="guideline" x1={lastPoint.x} y1={lastPoint.y} x2={firstPoint.x} y2={firstPoint.y} />}
 
           {for point, i in points
-            <DragHandle key={i} x={point.x} y={point.y} scale={@props.scale} onDrag={@handleHandleDrag.bind this, i} />}
+            if i%2 != 0
+              className = "open-drag-handle"
+            else
+              className = undefined
+            <DragHandle className={className} key={i} x={point.x} y={point.y} scale={@props.scale} onDrag={@handleHandleDrag.bind this, i} />}
 
           {unless @props.mark.closed
             <g>
               <circle className="clickable" r={finisherRadius} cx={firstPoint.x} cy={firstPoint.y} stroke="transparent" onClick={@handleFinishClick} />
+              <circle className="clickable" r={finisherRadius} cx={lastPoint.x} cy={lastPoint.y} onClick={@handleFinishClick} />
             </g>}
         </g>}
     </DrawingToolRoot>
