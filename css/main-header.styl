@@ -30,6 +30,9 @@
   .login-bar
     font-size: 1.4em
 
+    > *
+      margin: 0 0 0 1em
+
   .account-bar
     font-size: 1.4em
     position: relative
@@ -63,6 +66,10 @@
             border-radius: 50%
       a
         color: white
+
+  .hamburger-modal-trigger
+    width: 30px
+    height: 25px
 
 .main-title
   align-items: center
@@ -116,6 +123,13 @@
     border: 0
     flex: 1 1 auto
     margin: 0
+
+  &.mobile .main-nav-item
+    color: black
+    width: 100%
+
+    &:hover
+      color: MAIN_HIGHLIGHT
 
 .main-nav-item
   color: rgba(255,255,255,0.5)

@@ -3,14 +3,15 @@ Comment = require './comment'
 CommentBox = require './comment-box'
 commentValidations = require './lib/comment-validations'
 {getErrors} = require './lib/validations'
-Router = require 'react-router'
+Router = require '@edpaget/react-router'
 talkClient = require '../api/talk'
 Paginator = require './lib/paginator'
 PromiseRenderer = require '../components/promise-renderer'
+SingleSubmitButton = require '../components/single-submit-button'
 upvotedByCurrentUser = require './lib/upvoted-by-current-user'
 Moderation = require './lib/moderation'
 {timestamp} = require './lib/time'
-{Link} = require 'react-router'
+{Link} = require '@edpaget/react-router'
 merge = require 'lodash.merge'
 Avatar = require '../partials/avatar'
 DisplayRoles = require './lib/display-roles'
@@ -19,6 +20,10 @@ SignInPrompt = require '../partials/sign-in-prompt'
 alert = require '../lib/alert'
 merge = require 'lodash.merge'
 FollowDiscussion = require './follow-discussion'
+PopularTags = require './popular-tags'
+ActiveUsers = require './active-users'
+ProjectLinker = require './lib/project-linker'
+SidebarNotifications = require './lib/sidebar-notifications'
 
 PAGE_SIZE = talkConfig.discussionPageSize
 
@@ -61,8 +66,7 @@ module?.exports = React.createClass
 
         if page isnt @props.query.page
           @props.query.page = page
-          [path, _] = @getPath().split('?')
-          @replaceWith path, @props.params, @props.query
+          @replaceWith @getPath(), @props.params, @props.query
 
       @setComments(@props.query.page ? 1)
 
@@ -162,6 +166,7 @@ module?.exports = React.createClass
       data={data}
       active={+data.id is +@props.query?.comment}
       user={@props.user}
+      locked={@state.discussion?.locked}
       project={@props.project}
       onClickReply={@onClickReply}
       onLikeComment={@onLikeComment}
@@ -169,7 +174,8 @@ module?.exports = React.createClass
       onDeleteComment={@onDeleteComment}/>
 
   onClickDeleteDiscussion: ->
-    if window.confirm("Are you sure that you want to delete this discussions? All of the comments and discussions will be lost forever.")
+    deletePhrase = 'delete'
+    if window.prompt("Are you sure that you want to delete this discussion? All of the comments and discussions will be lost forever. Please type \"#{deletePhrase}\" in the box below to confirm:") is deletePhrase
       @discussionsRequest().delete()
         .then (deleted) =>
           @setComments(@props.query.page)
@@ -194,7 +200,7 @@ module?.exports = React.createClass
 
     @discussionsRequest().update({title, sticky, locked, board_id}).save()
       .then (discussion) =>
-        if discussion[0].board_id isnt board_id
+        if discussion[0].board_id isnt @props.params.board
           {owner, name} = @props.params
           discussionRoute = if (owner and name) then 'project-talk-discussion' else 'talk-discussion'
           @transitionTo discussionRoute, merge(@props.params, board: board_id), @props.query
@@ -264,7 +270,7 @@ module?.exports = React.createClass
                   <PromiseRenderer promise={talkClient.type('boards').get({section: discussion.section, page_size: 100})}>{(boards) =>
                     <div>
                       <p><strong>Board:</strong></p>
-                      <select value={discussion.board_id}>
+                      <select defaultValue={discussion.board_id}>
                         {boards.map (board, i) =>
                           <option key={board.id} value={board.id}>{board.title}</option>
                           }
@@ -272,12 +278,12 @@ module?.exports = React.createClass
                     </div>
                   }</PromiseRenderer>
 
-                  <button type="submit">Update</button>
+                  <SingleSubmitButton type="submit" onClick={@onEditSubmit}>Update</SingleSubmitButton>
                 </form>}
 
-              <button onClick={@onClickDeleteDiscussion}>
+              <SingleSubmitButton onClick={@onClickDeleteDiscussion}>
                 Delete this discussion <i className="fa fa-close" />
-              </button>
+              </SingleSubmitButton>
             </div>
           }
         </div>
@@ -293,8 +299,32 @@ module?.exports = React.createClass
 
       <Paginator page={+@state.commentsMeta.page} pageCount={@state.commentsMeta.page_count} />
 
-      <div className="talk-discussion-comments #{if discussion?.locked then 'locked' else ''}">
-        {@state.comments.map(@comment)}
+      <div className="talk-list-content">
+        <section>
+          <div className="talk-discussion-comments #{if discussion?.locked then 'locked' else ''}">
+            {@state.comments.map(@comment)}
+          </div>
+        </section>
+
+        <div className="talk-sidebar">
+          <SidebarNotifications {...@props} params={@props.params} />
+
+          <section>
+            <PopularTags
+              header={<h3>Popular Tags:</h3>}
+              section={@props.section}
+              params={@props.params} />
+          </section>
+
+          <section>
+            <ActiveUsers section={@props.section} />
+          </section>
+
+          <section>
+            <h3>Projects:</h3>
+            <p><ProjectLinker user={@props.user} /></p>
+          </section>
+        </div>
       </div>
 
       <Paginator page={+@state.commentsMeta.page} pageCount={@state.commentsMeta.page_count} />

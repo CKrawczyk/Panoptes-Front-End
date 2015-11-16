@@ -3,11 +3,11 @@ React = require 'react'
 ChangeListener = require '../../components/change-listener'
 PromiseRenderer = require '../../components/promise-renderer'
 Translate = require 'react-translate-component'
-{Link, RouteHandler} = require 'react-router'
+{Link, RouteHandler} = require '@edpaget/react-router'
 TitleMixin = require '../../lib/title-mixin'
 HandlePropChanges = require '../../lib/handle-prop-changes'
 apiClient = window.api = require '../../api/client'
-require '../../api/sugar'
+{sugarClient} = require '../../api/sugar'
 LoadingIndicator = require '../../components/loading-indicator'
 
 SOCIAL_ICONS =
