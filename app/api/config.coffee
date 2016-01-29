@@ -18,6 +18,10 @@ SUGAR_HOSTS =
   production: 'https://notifications.zooniverse.org'
   staging: 'https://notifications-staging.zooniverse.org'
 
+STAT_HOSTS =
+  production: 'http://ec2-54-172-236-230.compute-1.amazonaws.com'
+  staging: 'http://stats:3000'
+
 hostFromBrowser = location?.search.match(/\W?panoptes-api-host=([^&]+)/)?[1]
 appFromBrowser = location?.search.match(/\W?panoptes-api-application=([^&]+)/)?[1]
 talkFromBrowser = location?.search.match(/\W?talk-host=([^&]+)/)?[1]
@@ -27,6 +31,7 @@ hostFromShell = process.env.PANOPTES_API_HOST
 appFromShell = process.env.PANOPTES_API_APPLICATION
 talkFromShell = process.env.TALK_HOST
 sugarFromShell = process.env.SUGAR_HOST
+statFromShell = process.env.STAT_HOST
 
 envFromBrowser = location?.search.match(/\W?env=(\w+)/)?[1]
 envFromShell = process.env.NODE_ENV
@@ -38,3 +43,4 @@ module.exports =
   clientAppID: appFromBrowser ? appFromShell ? API_APPLICATION_IDS[env]
   talkHost: talkFromBrowser ? talkFromShell ? TALK_HOSTS[env]
   sugarHost: sugarFromBrowser ? sugarFromShell ? SUGAR_HOSTS[env]
+  statHost: statFromBrowser ? statFromShell ? STAT_HOSTS[env]
