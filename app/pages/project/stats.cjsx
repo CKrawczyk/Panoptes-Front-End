@@ -73,6 +73,49 @@ GraphD3 = React.createClass
       {node.toReact()}
     </div>
 
+ProgressD3 = React.createClass
+  getDefaultProps: ->
+    progress: 0
+
+  render: ->
+    width = 500
+    height = 500
+    formatPercent = d3.format('.0%')
+
+    arc = d3.svg.arc()
+      .startAngle(0)
+      .innerRadius(180)
+      .outerRadius(240)
+
+    node = ReactFauxDOM.createElement('svg')
+    svg = d3.select(node)
+      #.attr('width', width)
+      #.attr('height', height)
+      .attr("preserveAspectRatio", "xMinYMin meet")
+      .attr("viewBox", "0 0 500, 500")
+      .append('g')
+      .attr('transform', "translate(#{width / 2},#{height / 2})")
+
+    meter = svg.append('g')
+      .attr('class', 'progress-meter')
+
+    meter.append('path')
+      .attr('class', 'background')
+      .attr('d', arc.endAngle(2 * Math.PI))
+
+    foreground = meter.append('path')
+      .attr('class', 'foreground')
+      .attr('d', arc.endAngle(2 * Math.PI * @props.progress))
+
+    text = meter.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('dy', '.35em')
+      .text("#{formatPercent(@props.progress)} Complete")
+
+    <div className="svg-container progress-container">
+      {node.toReact()}
+    </div>
+
 ProjectStatsPage = React.createClass
   getDefaultProps: ->
     totalClassifications: 0
@@ -101,21 +144,14 @@ ProjectStatsPage = React.createClass
     <div className="project-stats-page content-container">
       <div className="project-stats-dashboard">
         <div className="major">
-          {@props.totalClassifications.toLocaleString()}<br />
-          Classifications
+          Classifications: {@props.totalClassifications.toLocaleString()}
+        </div>
+        <ProgressD3 progress={@props.totalClassifications / @props.requiredClassifications} />
+        <div>
+          Volunteers: {@props.totalVolunteers.toLocaleString()}
         </div>
         <div>
-          {@props.totalVolunteers.toLocaleString()}<br />
-          Volunteers
-        </div>
-
-        <div className="major">
-          <meter value={@props.totalClassifications} max={@props.requiredClassifications} /><br />
-          {Math.floor 100 * (@props.totalClassifications / @props.requiredClassifications)}% complete
-        </div>
-        <div>
-          {@props.currentVolunteers.toLocaleString()}<br />
-          Online now
+          Online now: {@props.currentVolunteers.toLocaleString()}
         </div>
       </div>
 
