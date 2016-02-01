@@ -1,5 +1,5 @@
 React = require 'react'
-d3 = require 'd3'
+{History} = require 'react-router'
 ReactFauxDOM = require 'react-faux-dom'
 qs = require 'qs'
 PromiseRenderer = require '../../components/promise-renderer'
@@ -11,16 +11,18 @@ GraphD3 = React.createClass
     by: 'hour'
     data: []
 
-  formatLabel:
-    hour: (date) -> moment(date).format 'hh:mm A'
-
   render: ->
+    formatLabel =
+      hour: d3.time.format('%m/%d %I:%M %p')
+      day: d3.time.format('%m/%d')
+      week: d3.time.format('%m/%d/%Y')
+      month: d3.time.format('%m/%d/%Y')
     parseDate = d3.time.format.iso.parse
     data = []
     @props.data.forEach ({label, value}) =>
       data.push {label: parseDate(label), value: value}
 
-    data = data[-24..]
+    data = data[(-1*@props.num)..]
 
     margin = {top: 20, right: 20, bottom: 100, left: 70}
     width = 1200 - margin.left - margin.right
@@ -29,7 +31,7 @@ GraphD3 = React.createClass
     x = d3.scale.ordinal().rangeRoundBands([0, width], .05)
     y = d3.scale.linear().range([height, 0])
 
-    xAxis = d3.svg.axis().scale(x).orient('bottom').tickFormat(d3.time.format('%m/%d %I:%M %p'))
+    xAxis = d3.svg.axis().scale(x).orient('bottom').tickFormat(formatLabel[@props.by])
     yAxis = d3.svg.axis().scale(y).orient('left')
 
     node = ReactFauxDOM.createElement('svg')
@@ -126,21 +128,28 @@ ProjectStatsPage = React.createClass
           <option value="month">month</option>
         </select><br />
         <PromiseRenderer promise={@classification_count(@props.classificationsBy)}>{(classificationData) =>
-          <GraphD3 data={classificationData} by={@props.classificationsBy} />
+          <GraphD3 data={classificationData} by={@props.classificationsBy} num={24} />
         }</PromiseRenderer>
       </div>
     </div>
 
   handleGraphChange: (which, e) ->
-    query = qs.parse location.search.slice 1
-    query[which] = e.target.value
-    location.search = qs.stringify query
+    @props.handleGraphChange(which, e)
 
 ProjectStatsPageController = React.createClass
+  mixins: [History]
+
+  handleGraphChange: (which, e) ->
+    query = qs.parse location.search.slice 1
+    query[which] = e.target.value
+    {owner, name} = @props.params
+    @history.pushState(null, "/projects/#{owner}/#{name}/stats/", query)
+
   render: ->
     # console.log @props
     queryProps =
-      # classificationsBy: @props.query.classifications
+      handleGraphChange: @handleGraphChange
+      classificationsBy: qs.parse(location.search.slice(1))['classifications'] ? 'hour'
       # volunteersBy: @props.query.volunteers
       projectId: @props.project.id
       totalClassifications: @props.project.classifications_count
