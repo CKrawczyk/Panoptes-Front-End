@@ -6,7 +6,6 @@
     "babel": "~5.8.23",
     "coffee-react": "~4.0.0",
     "counterpart": "~0.17.0",
-    "d3": "~3.5.14",
     "data-uri-to-blob": "0.0.4",
     "debounce": "~1.0.0",
     "document-shim": "~1.0.0",
