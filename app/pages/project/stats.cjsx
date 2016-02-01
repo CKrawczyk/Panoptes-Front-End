@@ -13,10 +13,10 @@ GraphD3 = React.createClass
 
   render: ->
     formatLabel =
-      hour: d3.time.format('%m/%d %I:%M %p')
-      day: d3.time.format('%m/%d')
-      week: d3.time.format('%m/%d/%Y')
-      month: d3.time.format('%m/%d/%Y')
+      hour: d3.time.format('%b-%d %I:%M %p')
+      day: d3.time.format('%b-%d-%Y')
+      week: d3.time.format('%b-%d-%Y')
+      month: d3.time.format('%b-%d-%Y')
     parseDate = d3.time.format.iso.parse
     data = []
     @props.data.forEach ({label, value}) =>
@@ -24,7 +24,7 @@ GraphD3 = React.createClass
 
     data = data[(-1*@props.num)..]
 
-    margin = {top: 20, right: 20, bottom: 100, left: 70}
+    margin = {top: 20, right: 20, bottom: 120, left: 70}
     width = 1200 - margin.left - margin.right
     height = 500 - margin.top - margin.bottom
 
@@ -36,8 +36,10 @@ GraphD3 = React.createClass
 
     node = ReactFauxDOM.createElement('svg')
     svg = d3.select(node)
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
+      #.attr('width', width + margin.left + margin.right)
+      #.attr('height', height + margin.top + margin.bottom)
+      .attr("preserveAspectRatio", "xMinYMin meet")
+      .attr("viewBox", "0 0 1200, 500")
       .append('g')
       .attr('transform', "translate(#{margin.left},#{margin.top})")
 
@@ -52,7 +54,7 @@ GraphD3 = React.createClass
       .style('text-anchor', 'end')
       .attr('dx', '-.8em')
       .attr('dy', '-.55em')
-      .attr('transform', 'rotate(-45)')
+      .attr('transform', 'rotate(-90)')
 
     svg.append('g')
       .attr('class', 'y axis')
@@ -67,7 +69,7 @@ GraphD3 = React.createClass
       .attr('y', (d) => y(d.value))
       .attr('height', (d) => height - y(d.value))
 
-    <div style={background: 'white'}>
+    <div className="svg-container">
       {node.toReact()}
     </div>
 
@@ -82,7 +84,6 @@ ProjectStatsPage = React.createClass
 
   classification_count: (period) ->
     stats_url = "#{config.statHost}/counts/classification/#{period}?project_id=#{@props.projectId}"
-    # console.log stats_url
     makeHTTPRequest 'GET', stats_url
       .then (response) =>
         results = JSON.parse response.responseText
@@ -90,7 +91,6 @@ ProjectStatsPage = React.createClass
         data = bucket_data.map (stat_object) =>
           label: stat_object.key_as_string
           value: stat_object.doc_count
-        # console?.log data
       .catch (response) ->
         console?.error 'Failed to get the stats'
 
@@ -98,14 +98,14 @@ ProjectStatsPage = React.createClass
     []
 
   render: ->
-    <div className="project-stats-page">
+    <div className="project-stats-page content-container">
       <div className="project-stats-dashboard">
         <div className="major">
-          {@props.totalClassifications}<br />
+          {@props.totalClassifications.toLocaleString()}<br />
           Classifications
         </div>
         <div>
-          {@props.totalVolunteers}<br />
+          {@props.totalVolunteers.toLocaleString()}<br />
           Volunteers
         </div>
 
@@ -114,7 +114,7 @@ ProjectStatsPage = React.createClass
           {Math.floor 100 * (@props.totalClassifications / @props.requiredClassifications)}% complete
         </div>
         <div>
-          {@props.currentVolunteers}<br />
+          {@props.currentVolunteers.toLocaleString()}<br />
           Online now
         </div>
       </div>
@@ -145,12 +145,14 @@ ProjectStatsPageController = React.createClass
     {owner, name} = @props.params
     @history.pushState(null, "/projects/#{owner}/#{name}/stats/", query)
 
+  getQuery: (which) ->
+    qs.parse(location.search.slice(1))[which]
+
   render: ->
-    # console.log @props
     queryProps =
       handleGraphChange: @handleGraphChange
-      classificationsBy: qs.parse(location.search.slice(1))['classifications'] ? 'hour'
-      # volunteersBy: @props.query.volunteers
+      classificationsBy: @getQuery('classifications') ? 'hour'
+      volunteersBy: @getQuery('valunteerss') ? 'hour'
       projectId: @props.project.id
       totalClassifications: @props.project.classifications_count
       # there must be a better way to get this number
