@@ -1,30 +1,22 @@
-.axis
-  font: 14px sans-serif
-
-.axis path,
-.axis line
-  fill: none
-  stroke: #000
-  shape-rendering: crispEdges
-
 .svg-container
-  display: inline-block
-  overflow: hidden
-  position: relative
-  vertical-align: middle
-  width: 100%
   background: white
 
 .progress-container
   width: 25%
+  position: relative
 
-.progress-meter
-  background: white
-  .background
-    fill: #ccc
+.ct-chart
+  .ct-bar, .ct-slice-donut
+    stroke: steelblue
+    stroke-width: 30px
+  .progress-label, .ct-label.ct-vertical, .ct-label.ct-horizontal
+    color: #000
+    fill: #000
 
-  .foreground
-    fill: steelblue
-
-  text
-    font-size: 45px
+.progress-label
+  color: #000
+  position: absolute
+  margin-top: 45%
+  width: 100%
+  text-align: center
+  font-size: 1.8vw

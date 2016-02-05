@@ -4,6 +4,7 @@
   "dependencies": {
     "animated-scrollto": "~1.1.0",
     "babel": "~5.8.23",
+    "chartist": "~0.9.5",
     "coffee-react": "~4.0.0",
     "counterpart": "~0.17.0",
     "data-uri-to-blob": "0.0.4",
@@ -26,9 +27,9 @@
     "papaparse": "mholt/PapaParse#cada171",
     "qs": "~6.0.2",
     "react": "~0.14.1",
+    "react-chartist": "~0.10.1",
     "react-component-resizable": "~0.3.0",
     "react-dom": "^0.14.1",
-    "react-faux-dom": "~2.1.1",
     "react-interpolate-component": "~0.8.0",
     "react-pullout": "~1.0.1",
     "react-router": "~1.0.0",

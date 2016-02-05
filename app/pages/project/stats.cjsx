@@ -1,120 +1,67 @@
 React = require 'react'
 {History} = require 'react-router'
-ReactFauxDOM = require 'react-faux-dom'
+ChartistGraph = require 'react-chartist'
+moment = require 'moment'
 qs = require 'qs'
 PromiseRenderer = require '../../components/promise-renderer'
 config = require '../../api/config'
 {Model, makeHTTPRequest} = require 'json-api-client'
 
-GraphD3 = React.createClass
-  getDefaultProp: ->
-    by: 'hour'
-    data: []
-
-  render: ->
-    formatLabel =
-      hour: d3.time.format('%b-%d %I:%M %p')
-      day: d3.time.format('%b-%d-%Y')
-      week: d3.time.format('%b-%d-%Y')
-      month: d3.time.format('%b-%d-%Y')
-    parseDate = d3.time.format.iso.parse
-    data = []
-    @props.data.forEach ({label, value}) =>
-      data.push {label: parseDate(label), value: value}
-
-    data = data[(-1*@props.num)..]
-
-    margin = {top: 20, right: 20, bottom: 120, left: 70}
-    width = 1200 - margin.left - margin.right
-    height = 500 - margin.top - margin.bottom
-
-    x = d3.scale.ordinal().rangeRoundBands([0, width], .05)
-    y = d3.scale.linear().range([height, 0])
-
-    xAxis = d3.svg.axis().scale(x).orient('bottom').tickFormat(formatLabel[@props.by])
-    yAxis = d3.svg.axis().scale(y).orient('left')
-
-    node = ReactFauxDOM.createElement('svg')
-    svg = d3.select(node)
-      #.attr('width', width + margin.left + margin.right)
-      #.attr('height', height + margin.top + margin.bottom)
-      .attr("preserveAspectRatio", "xMinYMin meet")
-      .attr("viewBox", "0 0 1200, 500")
-      .append('g')
-      .attr('transform', "translate(#{margin.left},#{margin.top})")
-
-    x.domain(data.map (d) => d.label)
-    y.domain([0, d3.max(data, (d) => d.value)])
-
-    svg.append('g')
-      .attr('class', 'x axis')
-      .attr('transform', "translate(0,#{height})")
-      .call(xAxis)
-      .selectAll('text')
-      .style('text-anchor', 'end')
-      .attr('dx', '-.8em')
-      .attr('dy', '-.55em')
-      .attr('transform', 'rotate(-90)')
-
-    svg.append('g')
-      .attr('class', 'y axis')
-      .call(yAxis)
-
-    svg.selectAll('bar')
-      .data(data)
-      .enter().append('rect')
-      .style('fill', 'steelblue')
-      .attr('x', (d) => x(d.label))
-      .attr('width', x.rangeBand())
-      .attr('y', (d) => y(d.value))
-      .attr('height', (d) => height - y(d.value))
-
-    <div className="svg-container">
-      {node.toReact()}
-    </div>
-
-ProgressD3 = React.createClass
+Progress = React.createClass
   getDefaultProps: ->
     progress: 0
+    options:
+      donut: true
+      donutWidth: 35
+      startAngle: 0
+      total: 1
+      showLabel: false
 
   render: ->
-    width = 500
-    height = 500
-    formatPercent = d3.format('.0%')
-
-    arc = d3.svg.arc()
-      .startAngle(0)
-      .innerRadius(180)
-      .outerRadius(240)
-
-    node = ReactFauxDOM.createElement('svg')
-    svg = d3.select(node)
-      #.attr('width', width)
-      #.attr('height', height)
-      .attr("preserveAspectRatio", "xMinYMin meet")
-      .attr("viewBox", "0 0 500, 500")
-      .append('g')
-      .attr('transform', "translate(#{width / 2},#{height / 2})")
-
-    meter = svg.append('g')
-      .attr('class', 'progress-meter')
-
-    meter.append('path')
-      .attr('class', 'background')
-      .attr('d', arc.endAngle(2 * Math.PI))
-
-    foreground = meter.append('path')
-      .attr('class', 'foreground')
-      .attr('d', arc.endAngle(2 * Math.PI * @props.progress))
-
-    text = meter.append('text')
-      .attr('text-anchor', 'middle')
-      .attr('dy', '.35em')
-      .text("#{formatPercent(@props.progress)} Complete")
+    percent = @props.progress * 100
+    data =
+      series: [@props.progress]
 
     <div className="svg-container progress-container">
-      {node.toReact()}
+      <span className="progress-label">{"#{percent.toFixed(0)}% Complete"}</span>
+      <ChartistGraph className="ct-square" type="Pie" data={data} options={@props.options} />
     </div>
+
+
+Graph = React.createClass
+  getDefaultProps: ->
+    data: []
+    options:
+      axisX:
+        offset: 40
+        showGrid: false
+      axisY:
+        onlyInteger: true
+
+  formatLabel:
+    hour: (date) -> moment(date).format 'MMM-DD hh:mm A'
+    day: (date) -> moment(date).format 'MMM-DD-YYYY'
+    week: (date) -> moment(date).format 'MMM-DD-YYYY'
+    month: (date) -> moment(date).format 'MMM-DD-YYYY'
+
+  render: ->
+    data =
+      labels: []
+      series: [[]]
+
+    minIdx = Object.keys(@props.data).length - @props.num
+    @props.data.forEach ({label, value}, idx) =>
+      if idx >= minIdx
+        data.labels.push @formatLabel[@props.by]?(label) ? label
+        data.series[0].push value
+
+    #data.labels = data.labels[(-1*@props.num)..]
+    #data.series[0] = data.series[0][(-1*@props.num)..]
+
+    <div className="svg-container">
+      <ChartistGraph className="ct-major-twelfth" type="Bar" data={data} options={@props.options} />
+    </div>
+
 
 ProjectStatsPage = React.createClass
   getDefaultProps: ->
@@ -146,7 +93,7 @@ ProjectStatsPage = React.createClass
         <div className="major">
           Classifications: {@props.totalClassifications.toLocaleString()}
         </div>
-        <ProgressD3 progress={@props.totalClassifications / @props.requiredClassifications} />
+        <Progress progress={@props.totalClassifications / @props.requiredClassifications} />
         <div>
           Volunteers: {@props.totalVolunteers.toLocaleString()}
         </div>
@@ -164,7 +111,7 @@ ProjectStatsPage = React.createClass
           <option value="month">month</option>
         </select><br />
         <PromiseRenderer promise={@classification_count(@props.classificationsBy)}>{(classificationData) =>
-          <GraphD3 data={classificationData} by={@props.classificationsBy} num={24} />
+          <Graph data={classificationData} by={@props.classificationsBy} num={24} />
         }</PromiseRenderer>
       </div>
     </div>
