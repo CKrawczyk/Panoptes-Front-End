@@ -26,6 +26,7 @@ hostFromBrowser = location?.search.match(/\W?panoptes-api-host=([^&]+)/)?[1]
 appFromBrowser = location?.search.match(/\W?panoptes-api-application=([^&]+)/)?[1]
 talkFromBrowser = location?.search.match(/\W?talk-host=([^&]+)/)?[1]
 sugarFromBrowser = location?.search.match(/\W?sugar-host=([^&]+)/)?[1]
+statFromBrowser = location?.search.match(/\W?stat-host=([^&]+)/)?[1]
 
 hostFromShell = process.env.PANOPTES_API_HOST
 appFromShell = process.env.PANOPTES_API_APPLICATION
