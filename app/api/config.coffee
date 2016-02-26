@@ -19,7 +19,7 @@ SUGAR_HOSTS =
   staging: 'https://notifications-staging.zooniverse.org'
 
 STAT_HOSTS =
-  production: 'http://ec2-54-172-236-230.compute-1.amazonaws.com'
+  production: 'http://ec2-54-165-93-89.compute-1.amazonaws.com'
   staging: 'http://stats:3000'
 
 hostFromBrowser = location?.search.match(/\W?panoptes-api-host=([^&]+)/)?[1]
